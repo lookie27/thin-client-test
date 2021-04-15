@@ -1,9 +1,8 @@
 <p>Time taken to load:{{timeToLoad}}</p>
 <table class='table table-striped' aria-labelledby="tableLabel" *ngIf="returnObject">
     <tbody>
-      <tr *ngFor="let object of returnObject.data; let lastCall = last">
-        <span *ngIf="lastCall">{{setTime()}} </span>
-          <ng-container *ngIf="shouldBeRed(object); else black">
+      <tr *ngFor="let object of returnObject.data; let i = index">
+          <ng-container *ngIf="shouldBeRed(object, i); else black">
               <td class="red">{{ object }}</td>
           </ng-container>
           <ng-template #black> <td>{{ object }}</td></ng-template>

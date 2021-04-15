@@ -8,33 +8,38 @@ import { Component, Inject } from '@angular/core';
 export class PageWithLogicComponent { 
     public returnObject: ReturnObject;
     public timeToLoad: number = 0;
+    private startTime: number;
 
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
-    this.timeToLoad = Date.now();
+    this.startTime = Date.now();
     http.get<ReturnObject>(baseUrl + 'data').subscribe(result => {
       this.returnObject = result;
     }, error => console.error(error));
   }
 
   setTime() {
-      this.timeToLoad = Date.now() - this.timeToLoad;
+      this.timeToLoad = Date.now() - this.startTime;
   }
 
-  shouldBeRed(value: string): boolean {
+  shouldBeRed(value: string, index: number): boolean {
+      var isRed = false;
       for (let i = 0; i < value.length; i++) {
           if (value.charAt(i) === 'r') {
               for (let j = i + 1; j < value.length; j++) {
                   if (value.charAt(j) === 'e') {
                       for (let k = j + 1; k < value.length; k++) {
                           if (value.charAt(k) === 'd') {
-                              return true;
+                            isRed = true;
                           }
                       }
                   }
               }
           }
       }
-      return false;
+      if (index === this.returnObject.data.length - 1) {
+          this.setTime();
+      }
+      return isRed;
   }
 }
 

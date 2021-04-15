@@ -1,16 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { forkJoin, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-page-without-logic',
   templateUrl: './page-without-logic.component.html',
 })
 export class PageWithoutLogicComponent {
-public returnObject: ReturnObject;
 public tuples$: Observable<Tuple[]>;
-public timeToLoad: number;
+public timeToLoad: number = 0;
 
 constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {
   let currentTime = Date.now();
@@ -19,17 +18,18 @@ constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: strin
       map(strings => strings.map(value => {
         let tuple = new Tuple();
         tuple.value = value;
-        this.shouldBeRed(value).subscribe(isRed => {
-          tuple.isRed = isRed;
-        });
+        tuple.isRed = this.shouldBeRed(value);
 
         return tuple;
       }))
     );
 
-    this.tuples$.subscribe(() => {
-      this.timeToLoad = Date.now() - currentTime;
-    })
+    this.tuples$.subscribe(value => {
+        let arrayOfIsRed = value.map(x => x.isRed)
+        forkJoin(arrayOfIsRed).subscribe(() => this.timeToLoad = Date.now() - currentTime);
+      
+      }
+    )
   }
 
   shouldBeRed(value: string): Observable<boolean> {
@@ -43,5 +43,5 @@ interface ReturnObject {
 
 class Tuple {
   value: string;
-  isRed: boolean;
+  isRed: Observable<boolean>;
 }
